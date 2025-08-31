@@ -84,7 +84,9 @@
     }
 
     function render() {
-      const filtered = rows;
+      const q = "*.pdf";
+      const filtered = q ? rows.filter(r => r.name.toLowerCase().includes(q) || r.type.toLowerCase().includes(q)) : rows;
+      
       if (!filtered.length) {
         tbody.innerHTML = '<tr><td colspan="2" class="mutedRow">No files found.</td></tr>';
         return;
