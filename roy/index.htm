@@ -36,7 +36,7 @@
         const rawUrl = `https://raw.githubusercontent.com/${repo}/${branch}/${item.path}`;
 
         const viewLink = document.createElement("a");
-        viewLink.href = rawUrl;
+        viewLink.href = 'https://rabergeau.github.io/${item.path}';
         viewLink.target = "_blank";
         viewLink.className = "text-blue-600 hover:underline font-medium";
         viewLink.textContent = "View";
