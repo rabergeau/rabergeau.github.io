@@ -12,10 +12,11 @@
 
   <script>
     async function loadFiles() {
-      const repo = "rabergeau/rabergeau.github.io"; 
+      const uname = "rabergeau";       
+      const repo = "rabergeau.github.io"; 
       const branch = "main"; 
       const path = "roy";  
-      const url = `https://api.github.com/repos/${repo}/contents/${path}?ref=${branch}`;
+      const url = `https://api.github.com/repos/${uname}/${repo}/contents/${path}?ref=${branch}`;
 
       const res = await fetch(url);
       const data = await res.json();
@@ -33,10 +34,8 @@
         const actions = document.createElement("div");
         actions.className = "space-x-3";
 
-        const rawUrl = `https://raw.githubusercontent.com/${repo}/${branch}/${item.path}`;
-
         const viewLink = document.createElement("a");
-        viewLink.href = 'https://rabergeau.github.io/${item.path}';
+        viewLink.href = `https://${repo}/${path}/${item.path}`;
         viewLink.target = "_blank";
         viewLink.className = "text-blue-600 hover:underline font-medium";
         viewLink.textContent = "View";
