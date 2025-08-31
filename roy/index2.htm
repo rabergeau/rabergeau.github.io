@@ -57,7 +57,8 @@
   </div>
 
   <script>
-    const repo = "rabergeau/rabergeau.github.io"; 
+    const uname = "rabergeau"; 
+    const repo = "rabergeau.github.io"; 
     const path = "roy";             
 
     const tbody = document.getElementById('tbody');
@@ -67,7 +68,7 @@
     async function loadFiles() {
       tbody.innerHTML = '<tr><td colspan="2" class="mutedRow">Loading…</td></tr>';
       try {
-        const url = `https://api.github.com/repos/${repo}/contents/${path}`;
+        const url = `https://api.github.com/repos/${uname}/${repo}/contents/${path}`;
         const res = await fetch(url);
         if (!res.ok) throw new Error("GitHub API error");
         const data = await res.json();
@@ -97,7 +98,10 @@
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td class="name">${r.name}</td>
-          <td class="nowrap"><a href="${r.download}" target="_blank">Download</a></td>
+          <td class="nowrap">
+          <a href="https://${repo}/${path}/${r.name}" target="_blank">View</a>&nbsp;&nbsp;&nbsp;
+          <a href="${r.download}" target="_blank">Download</a>
+          </td>
         `;
         frag.appendChild(tr);
       }
