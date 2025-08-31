@@ -38,13 +38,40 @@
 <body>
   <div class="container">
     <div class="card">
-      
+      <header>
+
+      </header>
+
+      <div class="toolbar">
+        <input class="search" id="search" placeholder="Filter by name or type…" />
+        <div class="muted" id="stats">—</div>
+      </div>
+
+      <div style="max-height: 65vh; overflow: auto;">
+        <table id="fileTable">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <tr><td colspan="3" class="mutedRow">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <footer>
+        <div>Data from GitHub REST API</div>
+        <div class="muted">Files never leave GitHub servers</div>
+      </footer>
     </div>
   </div>
 
   <script>
-    const repo = "rabergeau/rabergeau.github.io"; // 👈 change this to your repo (e.g. nicolas/my-site)
-    const path = "roy";              // 👈 subfolder inside repo, leave empty for root
+    const repo = "rabergeau/rabergeau.github.io"; 
+    const path = "roy";             
 
     const tbody = document.getElementById('tbody');
     const search = document.getElementById('search');
@@ -100,4 +127,3 @@
   </script>
 </body>
 </html>
-
