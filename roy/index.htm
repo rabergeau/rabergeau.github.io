@@ -84,7 +84,7 @@
     }
 
     function render() {
-      const q = "*.pdf";
+      const q = ".pdf";
       const filtered = q ? rows.filter(r => r.name.toLowerCase().includes(q)) : rows;
       
       if (!filtered.length) {
