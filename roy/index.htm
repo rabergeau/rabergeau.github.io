@@ -39,9 +39,6 @@
   <div class="container">
     <div class="card">
 
-      <div class="toolbar">
-      </div>
-
       <div style="max-height: 65vh; overflow: auto;">
         <table id="fileTable">
           <thead>
@@ -64,8 +61,6 @@
     const path = "roy";             
 
     const tbody = document.getElementById('tbody');
-    const search = document.getElementById('search');
-    const stats = document.getElementById('stats');
 
     let rows = [];
 
@@ -92,7 +87,6 @@
       const filtered = rows;
       if (!filtered.length) {
         tbody.innerHTML = '<tr><td colspan="2" class="mutedRow">No files found.</td></tr>';
-        stats.textContent = "0 files";
         return;
       }
       const frag = document.createDocumentFragment();
@@ -106,7 +100,6 @@
         frag.appendChild(tr);
       }
       tbody.replaceChildren(frag);
-      stats.textContent = `${filtered.length} file${filtered.length!==1?"s":""}`;
     }
     loadFiles();
   </script>
