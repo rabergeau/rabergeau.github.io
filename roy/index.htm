@@ -41,12 +41,6 @@
 
       <div style="max-height: 65vh; overflow: auto;">
         <table id="fileTable">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
           <tbody id="tbody">
             <tr><td colspan="2" class="mutedRow">Loading…</td></tr>
           </tbody>
@@ -86,7 +80,7 @@
 
     function render() {
       const q = ".pdf";
-      const filtered = q ? rows.filter(r => r.name.toLowerCase().includes(q)) : rows;
+      const filtered = q ? rows.filter(r => r.name.includes(q)) : rows;
       
       if (!filtered.length) {
         tbody.innerHTML = '<tr><td colspan="2" class="mutedRow">No files found.</td></tr>';
