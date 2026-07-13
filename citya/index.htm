@@ -22,7 +22,8 @@
     }
     .container { width: min(1100px, 100%); }
     .card { background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)); border: 1px solid var(--border); border-radius: 18px; box-shadow: 0 20px 40px rgba(0,0,0,.35); overflow: hidden; }
-    header { padding: 20px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    header { padding: 20px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .contact { font-weight: 600; }
     h1 { font-size: 1.25rem; margin: 0; letter-spacing: .2px; }
     .muted { color: var(--muted); font-size: .9rem; }
     table { width: 100%; border-collapse: collapse; }
@@ -70,9 +71,10 @@
     <div id="site" class="card" hidden>
       <header>
         <div>
-          <h1>Citya Syndic - Contact : Philippe Rabergeau <span class="nowrap">+33.06.72.30.85.95</span></h1>
+          <h1>Citya Syndic</h1>
           <p class="muted" style="margin: 6px 0 0;">Cliquez sur « View » pour ouvrir un document, ou « Download » pour l'enregistrer.</p>
         </div>
+        <div class="contact">Contact : Philippe Rabergeau <span class="nowrap">06.72.30.85.95</span></div>
       </header>
       <table>
         <thead>
