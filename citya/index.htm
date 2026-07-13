@@ -133,16 +133,26 @@
       return Math.max(1, Math.round(bytes / 1024)) + ' K';
     }
 
+    async function fetchList() {
+      try {
+        const res = await fetch('files.json', { cache: 'no-store' });
+        if (!res.ok) throw new Error('files.json missing');
+        return await res.json();
+      } catch (e) {
+        const res = await fetch(`https://api.github.com/repos/${uname}/${repo}/contents/${path}`);
+        if (!res.ok) throw new Error("GitHub API error");
+        return await res.json();
+      }
+    }
+
     async function loadFiles() {
       if (loaded) return;
       loaded = true;
       try {
-        const res = await fetch(`https://api.github.com/repos/${uname}/${repo}/contents/${path}`);
-        if (!res.ok) throw new Error("GitHub API error");
-        const data = await res.json();
+        const data = await fetchList();
         const rows = data
           .filter(item => item.name.toLowerCase().endsWith('.pdf'))
-          .map(item => ({ name: item.name, size: item.size, view: `https://${repo}/${path}/${item.name}`, download: item.download_url }));
+          .map(item => ({ name: item.name, size: item.size, view: `https://${repo}/${path}/${item.name}` }));
         rows.sort((a, b) => a.name.localeCompare(b.name));
 
         if (!rows.length) {
@@ -157,7 +167,7 @@
           tdName.textContent = r.name;
           const tdLinks = document.createElement('td');
           tdLinks.className = 'nowrap';
-          tdLinks.innerHTML = `<a href="${r.view}" target="_blank">View</a>&nbsp;&nbsp;&nbsp;<a href="${r.download}" target="_blank">Download</a>`;
+          tdLinks.innerHTML = `<a href="${r.view}" target="_blank">View</a>&nbsp;&nbsp;&nbsp;<a href="${r.view}" download>Download</a>`;
           const tdSize = document.createElement('td');
           tdSize.className = 'size';
           tdSize.textContent = fmtSize(r.size);

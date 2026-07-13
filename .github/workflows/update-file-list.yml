@@ -1,0 +1,37 @@
+name: Update file list
+
+on:
+  push:
+    branches: [main]
+    paths: ['citya/**.pdf']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate citya/files.json
+        run: |
+          python3 - <<'EOF'
+          import json, os
+          d = 'citya'
+          files = sorted(
+              ({'name': f, 'size': os.path.getsize(os.path.join(d, f))}
+               for f in os.listdir(d) if f.lower().endswith('.pdf')),
+              key=lambda x: x['name'])
+          with open(os.path.join(d, 'files.json'), 'w') as fh:
+              json.dump(files, fh, indent=1)
+          EOF
+      - name: Commit if changed
+        run: |
+          if ! git diff --quiet citya/files.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add citya/files.json
+            git commit -m "Update citya file list [skip ci]"
+            git push
+          fi
