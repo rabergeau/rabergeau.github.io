@@ -153,7 +153,7 @@
       try {
         const data = await fetchList();
         const rows = data
-          .filter(item => item.name.toLowerCase().endsWith('.pdf'))
+          .filter(item => /\.(pdf|zip)$/i.test(item.name))
           .map(item => ({ name: item.name, size: item.size, view: `https://${repo}/${path}/${item.name}` }));
         rows.sort((a, b) => a.name.localeCompare(b.name));
 
@@ -169,7 +169,8 @@
           tdName.textContent = r.name;
           const tdLinks = document.createElement('td');
           tdLinks.className = 'nowrap';
-          tdLinks.innerHTML = `<a href="${r.view}" target="_blank">View</a>&nbsp;&nbsp;&nbsp;<a href="${r.view}" download>Download</a>`;
+          const viewLink = /\.pdf$/i.test(r.name) ? `<a href="${r.view}" target="_blank">View</a>&nbsp;&nbsp;&nbsp;` : '';
+          tdLinks.innerHTML = `${viewLink}<a href="${r.view}" download>Download</a>`;
           const tdSize = document.createElement('td');
           tdSize.className = 'size';
           tdSize.textContent = fmtSize(r.size);

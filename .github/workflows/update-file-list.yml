@@ -3,7 +3,7 @@ name: Update file list
 on:
   push:
     branches: [main]
-    paths: ['citya/**.pdf']
+    paths: ['citya/**.pdf', 'citya/**.zip']
   workflow_dispatch:
 
 permissions:
@@ -21,7 +21,7 @@ jobs:
           d = 'citya'
           files = sorted(
               ({'name': f, 'size': os.path.getsize(os.path.join(d, f))}
-               for f in os.listdir(d) if f.lower().endswith('.pdf')),
+               for f in os.listdir(d) if f.lower().endswith(('.pdf', '.zip'))),
               key=lambda x: x['name'])
           with open(os.path.join(d, 'files.json'), 'w') as fh:
               json.dump(files, fh, indent=1)
