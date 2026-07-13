@@ -14,13 +14,15 @@ allows CORS, so the real document list loads even from localhost.
    `npm install playwright` in the scratchpad, then
    `chromium.launch({ channel: 'chrome', headless: true })`.
 3. Flows worth driving on `http://localhost:8123/`:
-   - Gate: wrong password → "Mot de passe incorrect."; `6975` → `#site` appears.
-   - Documents: wait for two `#sections h2` (Citya, Roy); count `tbody tr` rows.
+   - `/` is a public landing page linking to `/citya/` (no gate, no Roy link).
+   - `/citya/` gate: wrong password → "Mot de passe incorrect."; the password
+     (see PW_HASH comparison, case-sensitive, trimmed) → `#site` appears with
+     the citya PDFs in `#tbody`.
    - Search box `#search` filters rows; empty result shows "Aucun document trouvé."
-   - Reload → sessionStorage skips the gate AND documents still load
-     (regression: an early `unlock()` call once hit a TDZ error on `loaded`).
+   - Reload → sessionStorage (`unlocked-citya`) skips the gate AND documents
+     still load (regression: an early `unlock()` call once hit a TDZ error).
    - New browser context → gate shows again.
-   - `/citya/` meta-redirects to `/`.
+   - `/roy/` lists its PDFs with no gate (intentionally untouched legacy page).
 
 Gotchas: entry files are `index.htm` (not `.html`); a `/favicon.ico` 404 in the
 console is expected; unauthenticated GitHub API is limited to 60 req/hr/IP.

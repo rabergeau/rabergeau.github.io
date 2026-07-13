@@ -2,10 +2,166 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <meta http-equiv="refresh" content="0; url=/" />
-  <title>Redirection…</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Citya — Copropriété</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: #121a33;
+      --muted: #8fa3c8;
+      --text: #e8eefc;
+      --accent: #6ea8fe;
+      --border: #22335f;
+    }
+    body {
+      margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: radial-gradient(1200px 800px at 10% 0%, #0f1b3f, var(--bg)); color: var(--text);
+      min-height: 100vh; display: grid; place-items: start center; padding: 24px;
+    }
+    .container { width: min(1100px, 100%); }
+    .card { background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)); border: 1px solid var(--border); border-radius: 18px; box-shadow: 0 20px 40px rgba(0,0,0,.35); overflow: hidden; }
+    header { padding: 20px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    h1 { font-size: 1.25rem; margin: 0; letter-spacing: .2px; }
+    .muted { color: var(--muted); font-size: .9rem; }
+    .toolbar { padding: 14px 16px; border-bottom: 1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
+    .search { flex:1; background: #0c1533; border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 10px 12px; }
+    table { width: 100%; border-collapse: collapse; }
+    tbody td { border-bottom: 1px solid #0f1b3b; padding: 12px; font-size: .95rem; }
+    tbody tr:hover { background: rgba(110,168,254,0.06); }
+    .name { font-family: ui-monospace, monospace; }
+    .nowrap { white-space: nowrap; }
+    .mutedRow { color: var(--muted); text-align:center; padding:20px; }
+    a { color: var(--accent); }
+
+    /* Écran mot de passe */
+    #gate { display: grid; place-items: center; min-height: 60vh; }
+    .gateCard { background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)); border: 1px solid var(--border); border-radius: 18px; box-shadow: 0 20px 40px rgba(0,0,0,.35); padding: 32px; text-align: center; width: min(360px, 90vw); }
+    .gateCard h1 { margin-bottom: 18px; }
+    #pw { width: 100%; box-sizing: border-box; background: #0c1533; border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 12px; font-size: 1.1rem; text-align: center; margin-bottom: 12px; }
+    #pwBtn { width: 100%; background: var(--accent); color: #0b1020; border: none; border-radius: 10px; padding: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+    #pwBtn:hover { filter: brightness(1.1); }
+    #pwErr { color: #ff8a8a; font-size: .9rem; min-height: 1.2em; margin-top: 10px; }
+  </style>
 </head>
 <body>
-  <a href="/">Documents</a>
+  <div class="container">
+
+    <div id="gate">
+      <div class="gateCard">
+        <h1>Saisissez le mot de passe</h1>
+        <input id="pw" type="password" autocomplete="off" autofocus />
+        <button id="pwBtn">Entrer</button>
+        <div id="pwErr"></div>
+      </div>
+    </div>
+
+    <div id="site" class="card" hidden>
+      <header>
+        <h1>Citya — Copropriété</h1>
+        <span class="muted">Cliquez sur « Voir » pour ouvrir un document, ou « Télécharger » pour l'enregistrer.</span>
+      </header>
+      <div class="toolbar">
+        <input id="search" class="search" type="search" placeholder="Rechercher un document…" />
+      </div>
+      <div style="max-height: 70vh; overflow: auto;">
+        <table>
+          <tbody id="tbody">
+            <tr><td colspan="2" class="mutedRow">Chargement…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ----- Mot de passe -----
+    const PW_HASH = "468c7b6449dd928f2ddad069fbfdb31f59ce214d67a1422c7610efb886ce6aa7";
+    const gate = document.getElementById('gate');
+    const site = document.getElementById('site');
+    const pw = document.getElementById('pw');
+    const pwErr = document.getElementById('pwErr');
+
+    async function sha256Hex(text) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function unlock() {
+      gate.style.display = 'none';
+      site.hidden = false;
+      loadFiles();
+    }
+
+    async function checkPassword() {
+      const hash = await sha256Hex(pw.value.trim());
+      if (hash === PW_HASH) {
+        sessionStorage.setItem('unlocked-citya', '1');
+        unlock();
+      } else {
+        pwErr.textContent = 'Mot de passe incorrect.';
+        pw.value = '';
+        pw.focus();
+      }
+    }
+
+    document.getElementById('pwBtn').addEventListener('click', checkPassword);
+    pw.addEventListener('keydown', e => { if (e.key === 'Enter') checkPassword(); });
+
+    // ----- Liste des documents -----
+    const uname = "rabergeau";
+    const repo = "rabergeau.github.io";
+    const path = "citya";
+
+    const tbody = document.getElementById('tbody');
+    const searchEl = document.getElementById('search');
+    let rows = [];
+    let loaded = false;
+
+    async function loadFiles() {
+      if (loaded) return;
+      loaded = true;
+      try {
+        const res = await fetch(`https://api.github.com/repos/${uname}/${repo}/contents/${path}`);
+        if (!res.ok) throw new Error("GitHub API error");
+        const data = await res.json();
+        rows = data
+          .filter(item => item.name.toLowerCase().endsWith('.pdf'))
+          .map(item => ({ name: item.name, view: `https://${repo}/${path}/${item.name}`, download: item.download_url }));
+        rows.sort((a, b) => a.name.localeCompare(b.name));
+        render();
+      } catch (e) {
+        console.error(e);
+        tbody.innerHTML = '<tr><td colspan="2" class="mutedRow">Erreur lors du chargement des fichiers.</td></tr>';
+      }
+    }
+
+    function render() {
+      const q = searchEl.value.trim().toLowerCase();
+      const filtered = q ? rows.filter(r => r.name.toLowerCase().includes(q)) : rows;
+      if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="2" class="mutedRow">Aucun document trouvé.</td></tr>';
+        return;
+      }
+      const frag = document.createDocumentFragment();
+      for (const r of filtered) {
+        const tr = document.createElement('tr');
+        const tdName = document.createElement('td');
+        tdName.className = 'name';
+        tdName.textContent = r.name;
+        const tdLinks = document.createElement('td');
+        tdLinks.className = 'nowrap';
+        tdLinks.innerHTML = `<a href="${r.view}" target="_blank">Voir</a>&nbsp;&nbsp;&nbsp;<a href="${r.download}" target="_blank">Télécharger</a>`;
+        tr.append(tdName, tdLinks);
+        frag.appendChild(tr);
+      }
+      tbody.replaceChildren(frag);
+    }
+
+    searchEl.addEventListener('input', render);
+
+    if (sessionStorage.getItem('unlocked-citya') === '1') unlock();
+  </script>
 </body>
 </html>
