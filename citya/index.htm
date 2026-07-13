@@ -4,7 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>Citya — Syndic</title>
+  <title>Citya Syndic</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#128193;</text></svg>" />
   <style>
     :root {
       --bg: #0b1020;
@@ -25,12 +26,23 @@
     h1 { font-size: 1.25rem; margin: 0; letter-spacing: .2px; }
     .muted { color: var(--muted); font-size: .9rem; }
     table { width: 100%; border-collapse: collapse; }
+    thead th { background: #0f1836; border-bottom: 1px solid var(--border); text-align: left; padding: 12px; font-size: .9rem; color: var(--muted); }
     tbody td { border-bottom: 1px solid #0f1b3b; padding: 12px; font-size: .95rem; }
     tbody tr:hover { background: rgba(110,168,254,0.06); }
     .name { font-family: ui-monospace, monospace; }
     .nowrap { white-space: nowrap; }
+    .size { text-align: right; white-space: nowrap; }
+    td.size { color: var(--muted); }
     .mutedRow { color: var(--muted); text-align:center; padding:20px; }
     a { color: var(--accent); }
+
+    @media (max-width: 640px) {
+      body { padding: 10px; }
+      header { padding: 14px; }
+      h1 { font-size: 1rem; }
+      thead th, tbody td { padding: 8px 6px; font-size: .85rem; }
+      .name { word-break: break-all; font-size: .8rem; }
+    }
 
     /* Écran mot de passe */
     #gate { display: grid; place-items: center; min-height: 60vh; }
@@ -56,16 +68,19 @@
 
     <div id="site" class="card" hidden>
       <header>
-        <h1>Citya — Syndic</h1>
-        <span class="muted">Contact : Philippe Rabergeau — <a href="tel:+330672308595">+330672308595</a></span>
+        <div>
+          <h1>Citya Syndic - Contact : Philippe Rabergeau <span class="nowrap">+33.06.72.30.85.95</span></h1>
+          <p class="muted" style="margin: 6px 0 0;">Cliquez sur « View » pour ouvrir un document, ou « Download » pour l'enregistrer.</p>
+        </div>
       </header>
-      <div style="max-height: 70vh; overflow: auto;">
-        <table>
-          <tbody id="tbody">
-            <tr><td colspan="2" class="mutedRow">Chargement…</td></tr>
-          </tbody>
-        </table>
-      </div>
+      <table>
+        <thead>
+          <tr><th>Document</th><th></th><th class="size">Taille</th></tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="3" class="mutedRow">Chargement…</td></tr>
+        </tbody>
+      </table>
     </div>
 
   </div>
@@ -113,8 +128,8 @@
     let loaded = false;
 
     function fmtSize(bytes) {
-      if (bytes >= 1048576) return (bytes / 1048576).toFixed(1).replace('.', ',') + ' Mo';
-      return Math.max(1, Math.round(bytes / 1024)) + ' Ko';
+      if (bytes >= 1048576) return (bytes / 1048576).toFixed(1).replace('.', ',') + ' M';
+      return Math.max(1, Math.round(bytes / 1024)) + ' K';
     }
 
     async function loadFiles() {
@@ -130,7 +145,7 @@
         rows.sort((a, b) => a.name.localeCompare(b.name));
 
         if (!rows.length) {
-          tbody.innerHTML = '<tr><td colspan="2" class="mutedRow">Aucun document trouvé.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="3" class="mutedRow">Aucun document trouvé.</td></tr>';
           return;
         }
         const frag = document.createDocumentFragment();
@@ -141,14 +156,17 @@
           tdName.textContent = r.name;
           const tdLinks = document.createElement('td');
           tdLinks.className = 'nowrap';
-          tdLinks.innerHTML = `<a href="${r.view}" target="_blank">View</a>&nbsp;&nbsp;&nbsp;<a href="${r.download}" target="_blank">Download</a>&nbsp;&nbsp;<span class="muted">${fmtSize(r.size)}</span>`;
-          tr.append(tdName, tdLinks);
+          tdLinks.innerHTML = `<a href="${r.view}" target="_blank">View</a>&nbsp;&nbsp;&nbsp;<a href="${r.download}" target="_blank">Download</a>`;
+          const tdSize = document.createElement('td');
+          tdSize.className = 'size';
+          tdSize.textContent = fmtSize(r.size);
+          tr.append(tdName, tdLinks, tdSize);
           frag.appendChild(tr);
         }
         tbody.replaceChildren(frag);
       } catch (e) {
         console.error(e);
-        tbody.innerHTML = '<tr><td colspan="2" class="mutedRow">Erreur lors du chargement des fichiers.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="3" class="mutedRow">Impossible de charger la liste des documents. Veuillez réessayer dans quelques minutes.</td></tr>';
       }
     }
 
