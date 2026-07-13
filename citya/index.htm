@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>Citya — Copropriété</title>
+  <title>Citya — Syndic</title>
   <style>
     :root {
       --bg: #0b1020;
@@ -24,8 +24,6 @@
     header { padding: 20px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
     h1 { font-size: 1.25rem; margin: 0; letter-spacing: .2px; }
     .muted { color: var(--muted); font-size: .9rem; }
-    .toolbar { padding: 14px 16px; border-bottom: 1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
-    .search { flex:1; background: #0c1533; border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 10px 12px; }
     table { width: 100%; border-collapse: collapse; }
     tbody td { border-bottom: 1px solid #0f1b3b; padding: 12px; font-size: .95rem; }
     tbody tr:hover { background: rgba(110,168,254,0.06); }
@@ -58,12 +56,9 @@
 
     <div id="site" class="card" hidden>
       <header>
-        <h1>Citya — Copropriété</h1>
-        <span class="muted">Cliquez sur « Voir » pour ouvrir un document, ou « Télécharger » pour l'enregistrer.</span>
+        <h1>Citya — Syndic</h1>
+        <span class="muted">Contact : Philippe Rabergeau — <a href="tel:+330672308595">+330672308595</a></span>
       </header>
-      <div class="toolbar">
-        <input id="search" class="search" type="search" placeholder="Rechercher un document…" />
-      </div>
       <div style="max-height: 70vh; overflow: auto;">
         <table>
           <tbody id="tbody">
@@ -115,9 +110,12 @@
     const path = "citya";
 
     const tbody = document.getElementById('tbody');
-    const searchEl = document.getElementById('search');
-    let rows = [];
     let loaded = false;
+
+    function fmtSize(bytes) {
+      if (bytes >= 1048576) return (bytes / 1048576).toFixed(1).replace('.', ',') + ' Mo';
+      return Math.max(1, Math.round(bytes / 1024)) + ' Ko';
+    }
 
     async function loadFiles() {
       if (loaded) return;
@@ -126,40 +124,33 @@
         const res = await fetch(`https://api.github.com/repos/${uname}/${repo}/contents/${path}`);
         if (!res.ok) throw new Error("GitHub API error");
         const data = await res.json();
-        rows = data
+        const rows = data
           .filter(item => item.name.toLowerCase().endsWith('.pdf'))
-          .map(item => ({ name: item.name, view: `https://${repo}/${path}/${item.name}`, download: item.download_url }));
+          .map(item => ({ name: item.name, size: item.size, view: `https://${repo}/${path}/${item.name}`, download: item.download_url }));
         rows.sort((a, b) => a.name.localeCompare(b.name));
-        render();
+
+        if (!rows.length) {
+          tbody.innerHTML = '<tr><td colspan="2" class="mutedRow">Aucun document trouvé.</td></tr>';
+          return;
+        }
+        const frag = document.createDocumentFragment();
+        for (const r of rows) {
+          const tr = document.createElement('tr');
+          const tdName = document.createElement('td');
+          tdName.className = 'name';
+          tdName.textContent = r.name;
+          const tdLinks = document.createElement('td');
+          tdLinks.className = 'nowrap';
+          tdLinks.innerHTML = `<a href="${r.view}" target="_blank">View</a>&nbsp;&nbsp;&nbsp;<a href="${r.download}" target="_blank">Download</a>&nbsp;&nbsp;<span class="muted">${fmtSize(r.size)}</span>`;
+          tr.append(tdName, tdLinks);
+          frag.appendChild(tr);
+        }
+        tbody.replaceChildren(frag);
       } catch (e) {
         console.error(e);
         tbody.innerHTML = '<tr><td colspan="2" class="mutedRow">Erreur lors du chargement des fichiers.</td></tr>';
       }
     }
-
-    function render() {
-      const q = searchEl.value.trim().toLowerCase();
-      const filtered = q ? rows.filter(r => r.name.toLowerCase().includes(q)) : rows;
-      if (!filtered.length) {
-        tbody.innerHTML = '<tr><td colspan="2" class="mutedRow">Aucun document trouvé.</td></tr>';
-        return;
-      }
-      const frag = document.createDocumentFragment();
-      for (const r of filtered) {
-        const tr = document.createElement('tr');
-        const tdName = document.createElement('td');
-        tdName.className = 'name';
-        tdName.textContent = r.name;
-        const tdLinks = document.createElement('td');
-        tdLinks.className = 'nowrap';
-        tdLinks.innerHTML = `<a href="${r.view}" target="_blank">Voir</a>&nbsp;&nbsp;&nbsp;<a href="${r.download}" target="_blank">Télécharger</a>`;
-        tr.append(tdName, tdLinks);
-        frag.appendChild(tr);
-      }
-      tbody.replaceChildren(frag);
-    }
-
-    searchEl.addEventListener('input', render);
 
     if (sessionStorage.getItem('unlocked-citya') === '1') unlock();
   </script>
