@@ -137,7 +137,7 @@
 
     async function fetchList() {
       try {
-        const res = await fetch('files.json', { cache: 'no-store' });
+        const res = await fetch('files.json?t=' + Date.now(), { cache: 'no-store' });
         if (!res.ok) throw new Error('files.json missing');
         return await res.json();
       } catch (e) {
